@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CounterAPI", "CounterAPI\CounterAPI.csproj", "{A8195C80-D9F8-4471-9834-EC2AC8B5DBD7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CounterAPI.Common", "CounterAPI.Common\CounterAPI.Common.csproj", "{7F0A746D-7C6F-4ABA-8F16-76CAF2154A68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CounterAPI.SqlStorage", "CounterAPI.SqlStorage\CounterAPI.SqlStorage.csproj", "{C0C5FD2A-FF94-4279-8AAD-4FEF568A97FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CounterAPI.AzureTable", "CounterAPI.AzureTable\CounterAPI.AzureTable.csproj", "{FA223580-B728-4D85-9ABA-EAD14DAA7B47}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CounterAPI.LocalFile", "CounterAPI.LocalFile\CounterAPI.LocalFile.csproj", "{FF38C10B-DBE4-4141-87FF-C33C04C722C9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storage", "Storage", "{55A0FBFB-1C95-431E-B49F-9A14AA678185}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A8195C80-D9F8-4471-9834-EC2AC8B5DBD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8195C80-D9F8-4471-9834-EC2AC8B5DBD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8195C80-D9F8-4471-9834-EC2AC8B5DBD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8195C80-D9F8-4471-9834-EC2AC8B5DBD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F0A746D-7C6F-4ABA-8F16-76CAF2154A68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F0A746D-7C6F-4ABA-8F16-76CAF2154A68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F0A746D-7C6F-4ABA-8F16-76CAF2154A68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F0A746D-7C6F-4ABA-8F16-76CAF2154A68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0C5FD2A-FF94-4279-8AAD-4FEF568A97FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0C5FD2A-FF94-4279-8AAD-4FEF568A97FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0C5FD2A-FF94-4279-8AAD-4FEF568A97FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0C5FD2A-FF94-4279-8AAD-4FEF568A97FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA223580-B728-4D85-9ABA-EAD14DAA7B47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA223580-B728-4D85-9ABA-EAD14DAA7B47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA223580-B728-4D85-9ABA-EAD14DAA7B47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA223580-B728-4D85-9ABA-EAD14DAA7B47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF38C10B-DBE4-4141-87FF-C33C04C722C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF38C10B-DBE4-4141-87FF-C33C04C722C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF38C10B-DBE4-4141-87FF-C33C04C722C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF38C10B-DBE4-4141-87FF-C33C04C722C9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C0C5FD2A-FF94-4279-8AAD-4FEF568A97FD} = {55A0FBFB-1C95-431E-B49F-9A14AA678185}
+		{FF38C10B-DBE4-4141-87FF-C33C04C722C9} = {55A0FBFB-1C95-431E-B49F-9A14AA678185}
+		{FA223580-B728-4D85-9ABA-EAD14DAA7B47} = {55A0FBFB-1C95-431E-B49F-9A14AA678185}
+	EndGlobalSection
+EndGlobal
