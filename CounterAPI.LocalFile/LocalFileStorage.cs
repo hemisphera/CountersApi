@@ -9,7 +9,7 @@ public class LocalFileStorage : ICounterStorage
 
   public LocalFileStorage(string root)
   {
-    _root = root;
+    _root = new DirectoryInfo(root).FullName;
   }
 
 
@@ -54,5 +54,11 @@ public class LocalFileStorage : ICounterStorage
   {
     var folder = GetGroupFolder(group);
     return new FileInfo(Path.Combine(folder.FullName, name.Sanitize()));
+  }
+
+
+  public override string ToString()
+  {
+    return $"LocalFileStorage: {_root}";
   }
 }

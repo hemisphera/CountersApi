@@ -6,8 +6,6 @@ WORKDIR /src
 COPY CounterAPI/CounterAPI.csproj CounterAPI/
 COPY CounterAPI.Common/CounterAPI.Common.csproj CounterAPI.Common/
 COPY CounterAPI.LocalFile/CounterAPI.LocalFile.csproj CounterAPI.LocalFile/
-COPY CounterAPI.SqlStorage/CounterAPI.SqlStorage.csproj CounterAPI.SqlStorage/
-COPY CounterAPI.AzureTable/CounterAPI.AzureTable.csproj CounterAPI.AzureTable/
 COPY CounterAPI.sln ./
 
 RUN dotnet restore "CounterAPI.sln"
