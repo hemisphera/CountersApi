@@ -5,7 +5,8 @@ using CounterAPI.LocalFile;
 var builder = WebApplication.CreateSlimBuilder(args);
 
 //builder.Services.AddOpenApi();
-builder.Services.AddTransient<ICounterStorage, LocalFileStorage>(a => new LocalFileStorage(@"d:\temp\ctr"));
+var storagePath = Environment.GetEnvironmentVariable("COUNTERAPI_STORAGE_PATH") ?? @"d:\temp\ctr";
+builder.Services.AddTransient<ICounterStorage, LocalFileStorage>(a => new LocalFileStorage(storagePath));
 builder.Services.AddMemoryCache();
 
 var app = builder.Build();
