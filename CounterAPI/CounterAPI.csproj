@@ -9,12 +9,13 @@
 
     <ItemGroup>
         <PackageReference Include="Hsp.Azure.Table.Orm" Version="1.0.4" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\CounterAPI.Common\CounterAPI.Common.csproj" />
       <ProjectReference Include="..\CounterAPI.LocalFile\CounterAPI.LocalFile.csproj" />
+      <ProjectReference Include="..\CounterAPI.DynamoDb\CounterAPI.DynamoDb.csproj" />
     </ItemGroup>
 
 </Project>

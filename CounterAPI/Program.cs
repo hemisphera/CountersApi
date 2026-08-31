@@ -1,12 +1,24 @@
 using CounterAPI;
 using CounterAPI.Common;
+using CounterAPI.DynamoDb;
 using CounterAPI.LocalFile;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-//builder.Services.AddOpenApi();
-var storagePath = Environment.GetEnvironmentVariable("COUNTERAPI_STORAGE_PATH") ?? "_storage";
-builder.Services.AddSingleton<ICounterStorage, LocalFileStorage>(_ => new LocalFileStorage(storagePath));
+ICounterStorage storage;
+
+var addbTableName = Environment.GetEnvironmentVariable("ADDB_TABLE_NAME");
+if (!string.IsNullOrWhiteSpace(addbTableName))
+{
+  storage = new DynamoDbStorage(addbTableName);
+}
+else
+{
+  var storagePath = Environment.GetEnvironmentVariable("COUNTERAPI_STORAGE_PATH") ?? "_storage";
+  storage = new LocalFileStorage(storagePath);
+}
+
+builder.Services.AddSingleton(storage);
 builder.Services.AddOpenApi();
 builder.Services.AddMemoryCache();
 
@@ -23,7 +35,6 @@ group.MapGet("/{group}", Operations.ListCounters).WithName(nameof(Operations.Lis
 group.MapPost("/{group}/{name}", Operations.SetCounter).WithName(nameof(Operations.SetCounter));
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
-var storage = app.Services.GetRequiredService<ICounterStorage>();
 logger.LogInformation("Using storage: {storage}", storage);
 
 

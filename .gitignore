@@ -2,3 +2,6 @@
 */bin/*
 */obj/*
 */appsettings.Development.json
+Deploy/cdk.out
+**/bin
+**/obj
