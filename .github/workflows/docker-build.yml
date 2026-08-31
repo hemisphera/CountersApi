@@ -26,9 +26,9 @@ jobs:
           file: ./Dockerfile
           push: false
           load: true
-          tags: counterapi:latest
+          tags: countersapi:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Verify image
-        run: docker image inspect counterapi:latest --format '{{.Id}}'
+        run: docker image inspect countersapi:latest --format '{{.Id}}'

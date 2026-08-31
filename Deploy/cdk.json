@@ -1,5 +1,5 @@
 {
-  "app": "dotnet run --project src/CountersApiDeploy/CountersApiDeploy.csproj",
+  "app": "dotnet run --project src/CountersApi.Deploy/CountersApi.Deploy.csproj",
   "watch": {
     "include": [
       "**"

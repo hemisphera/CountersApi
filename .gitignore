@@ -1,7 +1,7 @@
-﻿.idea/.idea.CounterAPI/.idea
-*/bin/*
+﻿*/bin/*
 */obj/*
 */appsettings.Development.json
 Deploy/cdk.out
 **/bin
 **/obj
+.idea
