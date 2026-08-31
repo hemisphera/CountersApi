@@ -1,6 +1,4 @@
 using Amazon.CDK;
-using Amazon.CDK.AWS.AppSync;
-using Amazon.CDK.AWS.DynamoDB;
 using Constructs;
 
 namespace CountersApi.Deploy;

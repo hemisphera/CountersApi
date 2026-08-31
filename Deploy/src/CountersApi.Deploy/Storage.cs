@@ -8,9 +8,9 @@ public class Storage : Construct
 {
   internal TableV2 Table { get; }
 
-  internal Storage(Construct scope) : base(scope, "CountersApi_Storage")
+  internal Storage(Construct scope) : base(scope, "Storage")
   {
-    Table = new TableV2(this, "CountersApi_Table", new TablePropsV2
+    Table = new TableV2(this, "Table", new TablePropsV2
     {
       RemovalPolicy = RemovalPolicy.DESTROY,
       TableName = $"{Globals.Name}-{Globals.EnvironmentName}-{Globals.InternalId:D}",
@@ -26,7 +26,7 @@ public class Storage : Construct
       }
     });
 
-    new CfnOutput(this, "CountersApi_Table_Name", new CfnOutputProps
+    new CfnOutput(this, "TableName", new CfnOutputProps
     {
       Value = Table.TableName,
       Description = "Name of the table"

@@ -7,10 +7,10 @@ var builder = WebApplication.CreateSlimBuilder(args);
 
 ICounterStorage storage;
 
-var addbTableName = Environment.GetEnvironmentVariable("ADDB_TABLE_NAME");
-if (!string.IsNullOrWhiteSpace(addbTableName))
+var tableName = Environment.GetEnvironmentVariable("COUNTERSAPI_TABLE_NAME");
+if (!string.IsNullOrWhiteSpace(tableName))
 {
-  storage = new DynamoDbStorage(addbTableName);
+  storage = new DynamoDbStorage(tableName);
 }
 else
 {

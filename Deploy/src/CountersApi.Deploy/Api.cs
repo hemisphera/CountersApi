@@ -9,14 +9,14 @@ namespace CountersApi.Deploy;
 
 public class Api : Construct
 {
-  internal Api(Construct scope, Storage storage) : base(scope, "CountersApi_Api")
+  internal Api(Construct scope, Storage storage) : base(scope, "Api")
   {
-    var vpc = new Vpc(this, "CountersApi_Vpc", new VpcProps
+    var vpc = new Vpc(this, "Vpc", new VpcProps
     {
       MaxAzs = 2
     });
 
-    var service = new ApplicationLoadBalancedFargateService(this, "CountersApi_Service", new ApplicationLoadBalancedFargateServiceProps
+    var service = new ApplicationLoadBalancedFargateService(this, "Service", new ApplicationLoadBalancedFargateServiceProps
     {
       Vpc = vpc,
       PublicLoadBalancer = true,
@@ -28,14 +28,14 @@ public class Api : Construct
         ContainerPort = 8080,
         Environment = new Dictionary<string, string>
         {
-          ["TABLE_NAME"] = storage.Table.TableName
+          ["COUNTERSAPI_TABLE_NAME"] = storage.Table.TableName
         }
       }
     });
 
     storage.Table.GrantReadWriteData(service.TaskDefinition.TaskRole);
 
-    new CfnOutput(this, "CountersApi_Endpoint", new CfnOutputProps
+    new CfnOutput(this, "Endpoint", new CfnOutputProps
     {
       Value = $"http://{service.LoadBalancer.LoadBalancerDnsName}",
       Description = "URL of the Counter API"
