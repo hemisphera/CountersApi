@@ -1,0 +1,31 @@
+name: Resolve ECR repository
+description: >
+  Reads the ECR repository name from SSM Parameter Store. Single source of
+  truth is CDK (CountersApiRepoStack), which writes the parameter on every
+  infra deploy. Requires AWS credentials to be configured and the repo to be
+  checked out before this action runs.
+inputs:
+  parameter-name:
+    description: SSM parameter holding the ECR repository name
+    required: false
+    default: /counters-api/ecr/repository-name
+outputs:
+  repository:
+    description: ECR repository name
+    value: ${{ steps.resolve.outputs.repository }}
+runs:
+  using: composite
+  steps:
+    - id: resolve
+      shell: bash
+      run: |
+        ECR_REPOSITORY=$(aws ssm get-parameter \
+          --name "${{ inputs.parameter-name }}" \
+          --query 'Parameter.Value' \
+          --output text)
+        if [ -z "$ECR_REPOSITORY" ] || [ "$ECR_REPOSITORY" = "None" ]; then
+          echo "::error::Could not read ${{ inputs.parameter-name }} from SSM Parameter Store. Has the infra (CountersApiRepoStack) been deployed?"
+          exit 1
+        fi
+        echo "repository=$ECR_REPOSITORY" >> "$GITHUB_OUTPUT"
+        echo "Resolved ECR repository: $ECR_REPOSITORY"
