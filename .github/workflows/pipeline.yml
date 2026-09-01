@@ -19,6 +19,11 @@ jobs:
     name: Build, push image and deploy Lambda
     runs-on: ubuntu-latest
 
+    # Secrets and vars defined on the "Dev" environment (repo Settings ->
+    # Environments) are injected for all steps in this job and take
+    # precedence over repository-level secrets/vars of the same name.
+    environment: Dev
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
