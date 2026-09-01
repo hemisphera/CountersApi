@@ -1,0 +1,95 @@
+name: Build and Deploy
+
+# One pipeline for a push to master: build the image, push it to ECR, then
+# redeploy both CDK stacks against that exact SHA tag. Basing the deploy on
+# the pushed SHA only makes sense when build and deploy run together; it can
+# also be run manually (workflow_dispatch) to re-push/redeploy the branch head.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  IMAGE_TAG: sha-${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    name: Build, push image and deploy Lambda
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (access key)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS credentials
+        run: aws sts get-caller-identity
+
+      # Single source of truth: the ECR repo name is defined in CDK
+      # (CountersApiRepoStack) and written to SSM Parameter Store on every infra
+      # deploy. The lookup lives in a shared composite action.
+      - name: Resolve ECR repository name from SSM Parameter Store
+        id: ecr-repo
+        uses: ./.github/actions/resolve-ecr-repository
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Docker auth is registry-scoped; the action logs in to this account's
+      # ECR registry (derived from the credentials) and exposes it as `registry`.
+      # Push permissions for the specific repository come from IAM.
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ steps.ecr-login.outputs.registry }}/${{ steps.ecr-repo.outputs.repository }}:latest
+            ${{ steps.ecr-login.outputs.registry }}/${{ steps.ecr-repo.outputs.repository }}:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Print pushed image digest
+        run: |
+          ECR_REPOSITORY="${{ steps.ecr-repo.outputs.repository }}"
+          aws ecr describe-images \
+            --repository-name "$ECR_REPOSITORY" \
+            --image-ids imageTag="$IMAGE_TAG" \
+            --query 'imageDetails[0].imageDigest' --output text
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+
+      # Deploys both stacks so the pipeline is self-sufficient for infra:
+      # CountersApiRepoStack writes the ECR repo name to SSM Parameter Store
+      # (which the resolve step above reads) and CountersApiStack deploys the
+      # Lambda pointing at the SHA tag pushed above.
+      - name: CDK deploy
+        working-directory: Deploy
+        run: |
+          cdk deploy CountersApiRepoStack CountersApiStack \
+            --require-approval never \
+            -c imageTag="$IMAGE_TAG"

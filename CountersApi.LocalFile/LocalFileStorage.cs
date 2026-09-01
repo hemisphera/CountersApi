@@ -1,0 +1,77 @@
+﻿using CountersApi.Common;
+
+namespace CountersApi.LocalFile;
+
+public class LocalFileStorage : ICounterStorage
+{
+  private readonly string _root;
+
+
+  public LocalFileStorage(string root)
+  {
+    _root = new DirectoryInfo(root).FullName;
+  }
+
+
+  public async Task<CounterValue?> Get(string group, string name)
+  {
+    var file = GetCounterFile(group, name);
+    if (!file.Exists) return null;
+    var contents = await File.ReadAllLinesAsync(file.FullName);
+    return new CounterValue(
+      contents.Length > 0 ? long.Parse(contents[0]) : 0,
+      (contents.Length > 1 ? contents[1] : string.Empty).NullIfWhitespace()
+    );
+  }
+
+  public async Task Set(string group, string name, CounterValue value)
+  {
+    var file = GetCounterFile(group, name);
+    file.Directory?.Create();
+    await File.WriteAllLinesAsync(
+      file.FullName,
+      [
+        value.Value.ToString(),
+        value.Signature ?? string.Empty
+      ]);
+  }
+
+  public async Task<IEnumerable<string>> List(string group)
+  {
+    var groupFolder = GetGroupFolder(group);
+    var items = groupFolder.Exists
+      ? groupFolder.GetFiles().Select(file => file.Name)
+      : [];
+    return await ValueTask.FromResult(items.Select(StringExtensions.Sanitize));
+  }
+
+  public async Task<bool> IsAuthorized(string group, string? apiKey)
+  {
+    var apiKeysRoot = new DirectoryInfo(Path.Combine(_root, "apikeys"));
+    if (!apiKeysRoot.Exists) return true;
+    if (string.IsNullOrEmpty(apiKey)) return false;
+
+    var keyFile = new FileInfo(Path.Combine(apiKeysRoot.FullName, apiKey.Sanitize()));
+    if (!keyFile.Exists) return false;
+
+    var pattern = (await File.ReadAllTextAsync(keyFile.FullName)).NullIfWhitespace();
+    return GroupPatternMatcher.Matches(pattern, group);
+  }
+
+  private DirectoryInfo GetGroupFolder(string group)
+  {
+    return new DirectoryInfo(Path.Combine(_root, group.Sanitize()));
+  }
+
+  private FileInfo GetCounterFile(string group, string name)
+  {
+    var folder = GetGroupFolder(group);
+    return new FileInfo(Path.Combine(folder.FullName, name.Sanitize()));
+  }
+
+
+  public override string ToString()
+  {
+    return $"LocalFileStorage: {_root}";
+  }
+}
