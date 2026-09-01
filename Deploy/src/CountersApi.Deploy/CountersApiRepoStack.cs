@@ -18,7 +18,7 @@ public class CountersApiRepoStack : Stack
   {
     Repository = new Repository(this, "Repo", new RepositoryProps
     {
-      RepositoryName = $"{Globals.Name}-{Globals.EnvironmentName}-repo",
+      RepositoryName = $"{Globals.Name}-repo",
       // CI re-pushes the mutable :latest tag on every build.
       ImageTagMutability = TagMutability.MUTABLE,
       ImageScanOnPush = true,

@@ -10,8 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storage", "Storage", "{55A0
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CountersApi.DynamoDb", "CountersApi.DynamoDb\CountersApi.DynamoDb.csproj", "{866D160D-E46C-4563-9AD7-83EF144BD693}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CountersApi.Deploy", "Deploy\src\CountersApi.Deploy\CountersApi.Deploy.csproj", "{5DCC79B1-6A88-45F2-8334-1325A330B740}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,18 +68,6 @@ Global
 		{866D160D-E46C-4563-9AD7-83EF144BD693}.Release|x64.Build.0 = Release|Any CPU
 		{866D160D-E46C-4563-9AD7-83EF144BD693}.Release|x86.ActiveCfg = Release|Any CPU
 		{866D160D-E46C-4563-9AD7-83EF144BD693}.Release|x86.Build.0 = Release|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Debug|x64.Build.0 = Debug|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Debug|x86.Build.0 = Debug|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Release|x64.ActiveCfg = Release|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Release|x64.Build.0 = Release|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Release|x86.ActiveCfg = Release|Any CPU
-		{5DCC79B1-6A88-45F2-8334-1325A330B740}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
