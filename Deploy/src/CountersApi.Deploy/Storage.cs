@@ -11,10 +11,10 @@ public class Storage : Construct
 
   internal Storage(Construct scope) : base(scope, "Storage")
   {
-    Table = new TableV2(this, "Table", new TablePropsV2
+    Table = new TableV2(this, nameof(Table), new TablePropsV2
     {
       RemovalPolicy = RemovalPolicy.DESTROY,
-      TableName = $"{Globals.Name}-{Globals.EnvironmentName}-{Globals.InternalId:D}",
+      TableName = $"{Globals.Name}-{nameof(Table)}-{Globals.EnvironmentName}-{Globals.InternalId:D}",
       PartitionKey = new Attribute
       {
         Name = "Group",
@@ -27,10 +27,10 @@ public class Storage : Construct
       }
     });
 
-    ApiKeyTable = new TableV2(this, "ApiKeyTable", new TablePropsV2
+    ApiKeyTable = new TableV2(this, nameof(ApiKeyTable), new TablePropsV2
     {
       RemovalPolicy = RemovalPolicy.DESTROY,
-      TableName = $"{Globals.Name}-{Globals.EnvironmentName}-{Globals.InternalId:D}",
+      TableName = $"{Globals.Name}-{nameof(ApiKeyTable)}-{Globals.EnvironmentName}-{Globals.InternalId:D}",
       PartitionKey = new Attribute
       {
         Name = "Key",
