@@ -5,6 +5,8 @@ name: Build and Deploy
 # the pushed SHA only makes sense when build and deploy run together; it can
 # also be run manually (workflow_dispatch) to re-push/redeploy the branch head.
 on:
+  push:
+    branches: [ master ]
   workflow_dispatch:
 
 permissions:
@@ -55,12 +57,16 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Lambda requires a single image manifest; Buildx attaches provenance
+      # attestations by default, which turns the tag into an OCI image index
+      # that Lambda rejects ("media type ... is not supported").
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           push: true
+          provenance: false
           tags: |
             ${{ steps.ecr-login.outputs.registry }}/${{ steps.ecr-repo.outputs.repository }}:latest
             ${{ steps.ecr-login.outputs.registry }}/${{ steps.ecr-repo.outputs.repository }}:${{ env.IMAGE_TAG }}
