@@ -5,3 +5,4 @@ Deploy/cdk.out
 **/bin
 **/obj
 .idea
+*.user
