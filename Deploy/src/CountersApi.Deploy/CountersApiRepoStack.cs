@@ -1,5 +1,6 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.ECR;
+using Amazon.CDK.AWS.SSM;
 using Constructs;
 
 namespace CountersApi.Deploy;
@@ -13,6 +14,12 @@ namespace CountersApi.Deploy;
 public class CountersApiRepoStack : Stack
 {
   internal IRepository Repository { get; }
+
+  /// <summary>
+  ///   SSM parameter holding the ECR repository name; CI (GitHub Actions) reads
+  ///   the image repository from here instead of polling stack outputs.
+  /// </summary>
+  internal static string RepositoryNameParameterPath => $"/{Globals.Name}/ecr/repository-name";
 
   internal CountersApiRepoStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
   {
@@ -33,6 +40,15 @@ public class CountersApiRepoStack : Stack
           MaxImageCount = 5
         }
       ]
+    });
+
+    // Written on every deploy of this stack, so CI always sees the current
+    // repo name even if Globals.Name changes and the repository is recreated.
+    _ = new StringParameter(this, "RepositoryNameParameter", new StringParameterProps
+    {
+      ParameterName = RepositoryNameParameterPath,
+      StringValue = Repository.RepositoryName,
+      Description = "ECR repository holding the API container image (consumed by CI)"
     });
 
     _ = new CfnOutput(this, "RepositoryName", new CfnOutputProps
