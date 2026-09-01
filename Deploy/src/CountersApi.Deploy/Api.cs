@@ -11,8 +11,10 @@ public class Api : Construct
   internal Api(Construct scope, Storage storage, IRepository repository) : base(scope, "Api")
   {
     // Reference an image CI has already pushed to ECR (tag :latest). No local
-    // Docker build happens at synth/deploy time. The Lambda Web Adapter baked
-    // into the image proxies the Lambda Runtime API <-> the app's HTTP port.
+    // Docker build happens at synth/deploy time. The image's ENTRYPOINT runs
+    // `dotnet CountersApi.dll`; AddAWSLambdaHosting self-bootstraps the Lambda
+    // runtime (Amazon.Lambda.RuntimeSupport) to process Lambda events as
+    // ASP.NET Core requests, so no Lambda Web Adapter is needed.
     var code = DockerImageCode.FromEcr(repository, new EcrImageCodeProps
     {
       TagOrDigest = "latest"

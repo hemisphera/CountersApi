@@ -1,3 +1,4 @@
+using Amazon.Lambda.AspNetCoreServer;
 using CountersApi;
 using CountersApi.Common;
 using CountersApi.DynamoDb;
@@ -22,6 +23,12 @@ else
 builder.Services.AddSingleton(storage);
 builder.Services.AddOpenApi();
 builder.Services.AddMemoryCache();
+
+// When running on Lambda this replaces Kestrel with the Lambda runtime client
+// (Amazon.Lambda.RuntimeSupport) and processes Lambda events as ASP.NET Core
+// requests. When NOT running on Lambda the call is a no-op and Kestrel is used,
+// so the same assembly runs standalone and on Lambda.
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 var app = builder.Build();
 

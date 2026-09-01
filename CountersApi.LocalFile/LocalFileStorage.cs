@@ -40,7 +40,7 @@ public class LocalFileStorage : ICounterStorage
   {
     var groupFolder = GetGroupFolder(group);
     var items = groupFolder.Exists
-      ? groupFolder.GetFileSystemInfos().Where(fsi => fsi is DirectoryInfo).Select(dir => dir.Name)
+      ? groupFolder.GetFiles().Select(file => file.Name)
       : [];
     return await ValueTask.FromResult(items.Select(StringExtensions.Sanitize));
   }
