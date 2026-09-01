@@ -16,8 +16,13 @@ COPY . .
 RUN dotnet publish CountersApi/CountersApi.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # --- runtime stage ---
+# Lambda Web Adapter bridges the Lambda Runtime API to the container's HTTP
+# port, so the same image can run on Lambda, Fargate, or EC2 unchanged.
+# It ships its own Runtime Interface Client, so no AWS Lambda base image is needed.
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish ./
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:1.0.1 /lambda-adapter /opt/extensions/lambda-adapter
+ENV PORT=8080
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "CountersApi.dll"]

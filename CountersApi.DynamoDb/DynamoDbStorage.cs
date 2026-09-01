@@ -16,25 +16,31 @@ public class DynamoDbStorage : ICounterStorage
   private const string SortKeyName = "Name";
   private const string ValueAttributeName = "Value";
   private const string SignatureAttributeName = "Signature";
+  private const string ApiKeyPartitionKeyName = "Key";
+  private const string GroupPatternAttributeName = "GroupPattern";
 
   private readonly IAmazonDynamoDB _client;
   private readonly string _tableName;
+  private readonly string? _apiKeyTableName;
 
 
   /// <summary>
   ///   Creates a new <see cref="DynamoDbStorage" /> using the default AWS
   ///   credential chain, which picks up ECS task role credentials when running
-  ///   inside ECS, and the default AWS region from the environment.
+  ///   inside ECS, and the default AWS region from the environment. When
+  ///   <paramref name="apiKeyTableName" /> is supplied it is used to validate
+  ///   optional per-group API keys.
   /// </summary>
-  public DynamoDbStorage(string tableName)
-    : this(new AmazonDynamoDBClient(), tableName)
+  public DynamoDbStorage(string tableName, string? apiKeyTableName = null)
+    : this(new AmazonDynamoDBClient(), tableName, apiKeyTableName)
   {
   }
 
-  public DynamoDbStorage(IAmazonDynamoDB client, string tableName)
+  public DynamoDbStorage(IAmazonDynamoDB client, string tableName, string? apiKeyTableName = null)
   {
     _client = client;
     _tableName = tableName;
+    _apiKeyTableName = apiKeyTableName;
   }
 
 
@@ -100,6 +106,30 @@ public class DynamoDbStorage : ICounterStorage
     return response.Items
       .Where(item => item.TryGetValue(SortKeyName, out var nameAttr) && nameAttr.S is not null)
       .Select(item => item[SortKeyName].S!);
+  }
+
+
+  public async Task<bool> IsAuthorized(string group, string? apiKey)
+  {
+    if (string.IsNullOrEmpty(_apiKeyTableName)) return true;
+    if (string.IsNullOrEmpty(apiKey)) return false;
+
+    var response = await _client.GetItemAsync(new GetItemRequest
+    {
+      TableName = _apiKeyTableName,
+      Key = new Dictionary<string, AttributeValue>
+      {
+        [ApiKeyPartitionKeyName] = new AttributeValue { S = apiKey }
+      }
+    });
+
+    if (!response.IsItemSet) return false;
+
+    var pattern = response.Item.TryGetValue(GroupPatternAttributeName, out var patternAttr) && patternAttr.S is { } p
+      ? p.NullIfWhitespace()
+      : null;
+
+    return GroupPatternMatcher.Matches(pattern, group);
   }
 
 

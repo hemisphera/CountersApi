@@ -10,7 +10,8 @@ ICounterStorage storage;
 var tableName = Environment.GetEnvironmentVariable("COUNTERSAPI_TABLE_NAME");
 if (!string.IsNullOrWhiteSpace(tableName))
 {
-  storage = new DynamoDbStorage(tableName);
+  var apiKeyTableName = Environment.GetEnvironmentVariable("COUNTERSAPI_API_KEY_TABLE_NAME");
+  storage = new DynamoDbStorage(tableName, apiKeyTableName);
 }
 else
 {

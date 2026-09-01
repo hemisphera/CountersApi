@@ -1,44 +1,50 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Amazon.CDK;
-using Amazon.CDK.AWS.EC2;
-using Amazon.CDK.AWS.ECS;
-using Amazon.CDK.AWS.ECS.Patterns;
+using Amazon.CDK.AWS.ECR;
+using Amazon.CDK.AWS.Lambda;
 using Constructs;
 
 namespace CountersApi.Deploy;
 
 public class Api : Construct
 {
-  internal Api(Construct scope, Storage storage) : base(scope, "Api")
+  internal Api(Construct scope, Storage storage, IRepository repository) : base(scope, "Api")
   {
-    var vpc = new Vpc(this, "Vpc", new VpcProps
+    // Reference an image CI has already pushed to ECR (tag :latest). No local
+    // Docker build happens at synth/deploy time. The Lambda Web Adapter baked
+    // into the image proxies the Lambda Runtime API <-> the app's HTTP port.
+    var code = DockerImageCode.FromEcr(repository, new EcrImageCodeProps
     {
-      MaxAzs = 2
+      TagOrDigest = "latest"
     });
 
-    var service = new ApplicationLoadBalancedFargateService(this, "Service", new ApplicationLoadBalancedFargateServiceProps
+    var func = new DockerImageFunction(this, "Function", new DockerImageFunctionProps
     {
-      Vpc = vpc,
-      PublicLoadBalancer = true,
-      DesiredCount = 1,
-      AssignPublicIp = true,
-      TaskImageOptions = new ApplicationLoadBalancedTaskImageOptions
+      Code = code,
+      // .NET cold start is acceptable here; 512MB keeps per-invocation cost low.
+      MemorySize = 512,
+      Timeout = Duration.Seconds(30),
+      Environment = new Dictionary<string, string>
       {
-        Image = ContainerImage.FromRegistry("ahedfour/countersapi"),
-        ContainerPort = 8080,
-        Environment = new Dictionary<string, string>
-        {
-          ["COUNTERSAPI_TABLE_NAME"] = storage.Table.TableName
-        }
+        ["COUNTERSAPI_TABLE_NAME"] = storage.Table.TableName,
+        ["COUNTERSAPI_API_KEY_TABLE_NAME"] = storage.ApiKeyTable.TableName
       }
     });
 
-    storage.Table.GrantReadWriteData(service.TaskDefinition.TaskRole);
+    storage.Table.GrantReadWriteData(func);
+    storage.ApiKeyTable.GrantReadData(func);
+
+    // Function URL = public HTTPS endpoint with no API Gateway cost (scales to zero).
+    // NONE matches the previous public ALB; switch to AWS_IAM for authenticated access.
+    var url = func.AddFunctionUrl(new FunctionUrlOptions
+    {
+      AuthType = FunctionUrlAuthType.NONE
+    });
 
     new CfnOutput(this, "Endpoint", new CfnOutputProps
     {
-      Value = $"http://{service.LoadBalancer.LoadBalancerDnsName}",
-      Description = "URL of the Counter API"
+      Value = url.Url,
+      Description = "URL of the Counter API (Lambda Function URL)"
     });
   }
 }

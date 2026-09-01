@@ -45,6 +45,19 @@ public class LocalFileStorage : ICounterStorage
     return await ValueTask.FromResult(items.Select(StringExtensions.Sanitize));
   }
 
+  public async Task<bool> IsAuthorized(string group, string? apiKey)
+  {
+    var apiKeysRoot = new DirectoryInfo(Path.Combine(_root, "apikeys"));
+    if (!apiKeysRoot.Exists) return true;
+    if (string.IsNullOrEmpty(apiKey)) return false;
+
+    var keyFile = new FileInfo(Path.Combine(apiKeysRoot.FullName, apiKey.Sanitize()));
+    if (!keyFile.Exists) return false;
+
+    var pattern = (await File.ReadAllTextAsync(keyFile.FullName)).NullIfWhitespace();
+    return GroupPatternMatcher.Matches(pattern, group);
+  }
+
   private DirectoryInfo GetGroupFolder(string group)
   {
     return new DirectoryInfo(Path.Combine(_root, group.Sanitize()));

@@ -6,8 +6,10 @@ namespace CountersApi;
 
 public static class Operations
 {
-  public static async Task<IResult> GetCounter([FromRoute] string group, [FromRoute] string name, ICounterStorage storage)
+  public static async Task<IResult> GetCounter([FromRoute] string group, [FromRoute] string name, ICounterStorage storage, [FromHeader(Name = "X-API-Key")] string? apiKey)
   {
+    if (!await storage.IsAuthorized(group, apiKey)) return Results.Unauthorized();
+
     var current = await storage.Get(group, name);
     if (current == null) return Results.NotFound();
     return Results.Ok(new
@@ -17,14 +19,18 @@ public static class Operations
     });
   }
 
-  public static async Task<IResult> ListCounters([FromRoute] string group, ICounterStorage storage)
+  public static async Task<IResult> ListCounters([FromRoute] string group, ICounterStorage storage, [FromHeader(Name = "X-API-Key")] string? apiKey)
   {
+    if (!await storage.IsAuthorized(group, apiKey)) return Results.Unauthorized();
+
     var items = await storage.List(group);
     return Results.Ok(items);
   }
 
-  public static async Task<IResult> SetCounter([FromRoute] string group, [FromRoute] string name, [FromBody] CounterRequest request, ICounterStorage storage)
+  public static async Task<IResult> SetCounter([FromRoute] string group, [FromRoute] string name, [FromBody] CounterRequest request, ICounterStorage storage, [FromHeader(Name = "X-API-Key")] string? apiKey)
   {
+    if (!await storage.IsAuthorized(group, apiKey)) return Results.Unauthorized();
+
     var actualSignature = HashSignatureIfNeeded(request.Signature);
 
     if (request.Value != null)
