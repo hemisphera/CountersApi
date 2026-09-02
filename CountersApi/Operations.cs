@@ -6,20 +6,27 @@ namespace CountersApi;
 
 public static class Operations
 {
-  public static async Task<IResult> GetCounter([FromRoute] string group, [FromRoute] string name, ICounterStorage storage, [FromHeader(Name = "X-API-Key")] string? apiKey)
+  private const string ApiKeyHeaderName = "X-API-Key";
+
+
+  public static async Task<IResult> GetCounter(
+    ICounterStorage storage,
+    [FromRoute] string group,
+    [FromRoute] string name,
+    [FromHeader(Name = ApiKeyHeaderName)] string? apiKey)
   {
     if (!await storage.IsAuthorized(group, apiKey)) return Results.Unauthorized();
 
     var current = await storage.Get(group, name);
-    if (current == null) return Results.NotFound();
-    return Results.Ok(new
-    {
-      current.Value.Value,
-      current.Value.Signature
-    });
+    return current == null
+      ? Results.NotFound()
+      : Results.Ok(new CounterStateDto(group, name, current.Value));
   }
 
-  public static async Task<IResult> ListCounters([FromRoute] string group, ICounterStorage storage, [FromHeader(Name = "X-API-Key")] string? apiKey)
+  public static async Task<IResult> ListCounters(
+    ICounterStorage storage,
+    [FromRoute] string group,
+    [FromHeader(Name = ApiKeyHeaderName)] string? apiKey)
   {
     if (!await storage.IsAuthorized(group, apiKey)) return Results.Unauthorized();
 
@@ -27,7 +34,11 @@ public static class Operations
     return Results.Ok(items);
   }
 
-  public static async Task<IResult> SetCounter([FromRoute] string group, [FromRoute] string name, [FromBody] CounterRequest request, ICounterStorage storage, [FromHeader(Name = "X-API-Key")] string? apiKey)
+  public static async Task<IResult> SetCounter(
+    ICounterStorage storage,
+    [FromRoute] string group, [FromRoute] string name,
+    [FromHeader(Name = ApiKeyHeaderName)] string? apiKey,
+    [FromBody] CounterRequest request)
   {
     if (!await storage.IsAuthorized(group, apiKey)) return Results.Unauthorized();
 
@@ -35,9 +46,9 @@ public static class Operations
 
     if (request.Value != null)
     {
-      var result = request.Value.Value;
-      await storage.Set(group, name, new CounterValue(request.Value.Value, actualSignature));
-      return Results.Ok(result);
+      var result = new CounterValue(request.Value.Value, actualSignature);
+      await storage.Set(group, name, result);
+      return Results.Ok(new CounterStateDto(group, name, result, true));
     }
 
     var existing = await storage.Get(group, name);
@@ -45,14 +56,15 @@ public static class Operations
 
     if (!string.IsNullOrEmpty(actualSignature) && SignatureMatches(existing?.Signature, actualSignature))
     {
-      return Results.Ok(currValue);
+      return Results.Ok(new CounterStateDto(group, name, new CounterValue(currValue, existing?.Signature), false));
     }
 
     // only increment existing values, newly created (0 or seed) are left as-is
-    var newValue = existing == null ? currValue : currValue + request.Increment;
-    await storage.Set(group, name, new CounterValue(newValue, actualSignature));
-    return Results.Ok(newValue);
+    var newValue = new CounterValue(existing == null ? currValue : currValue + request.Increment, actualSignature);
+    await storage.Set(group, name, newValue);
+    return Results.Ok(new CounterStateDto(group, name, newValue, true));
   }
+
 
   private static string? HashSignatureIfNeeded(string? requestSignature)
   {
@@ -74,10 +86,10 @@ public static class Operations
     return true;
   }
 
-  private static bool SignatureMatches(string? cvSignature, string? bodySignature)
+  private static bool SignatureMatches(string? sig1, string? sig2)
   {
-    if (cvSignature == null && bodySignature == null) return true;
-    if (cvSignature == null || bodySignature == null) return false;
-    return cvSignature == bodySignature;
+    if (sig1 == null && sig2 == null) return true;
+    if (sig1 == null || sig2 == null) return false;
+    return sig1 == sig2;
   }
 }

@@ -1,12 +1,20 @@
-﻿using System.Text.Json.Serialization;
+using CountersApi.Common;
 
 namespace CountersApi.Models;
 
-[JsonSerializable(typeof(CounterStateDto))]
 public class CounterStateDto
 {
-  public string Group { get; set; } = string.Empty;
-  public string Name { get; set; } = string.Empty;
-  public string Signature { get; set; } = string.Empty;
-  public int Value { get; set; }
+  public string Group { get; }
+  public string Name { get; }
+  public CounterValue Value { get; }
+  public bool? WasModified { get; }
+
+
+  public CounterStateDto(string group, string name, CounterValue value, bool? wasModified = null)
+  {
+    Group = group;
+    Name = name;
+    Value = value;
+    WasModified = wasModified;
+  }
 }

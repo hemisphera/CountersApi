@@ -1,4 +1,3 @@
-using Amazon.Lambda.AspNetCoreServer;
 using CountersApi;
 using CountersApi.Common;
 using CountersApi.DynamoDb;
@@ -23,6 +22,11 @@ else
 builder.Services.AddSingleton(storage);
 builder.Services.AddOpenApi();
 builder.Services.AddMemoryCache();
+
+// Use the source-generated JSON serializer context (fast-path, no reflection)
+// for the API's DTOs; unknown types fall back to reflection via the resolver chain.
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+  options.SerializerOptions.TypeInfoResolverChain.Insert(0, CountersApi.Models.AppJsonContext.Default));
 
 // When running on Lambda this replaces Kestrel with the Lambda runtime client
 // (Amazon.Lambda.RuntimeSupport) and processes Lambda events as ASP.NET Core
